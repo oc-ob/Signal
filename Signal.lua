@@ -17,7 +17,7 @@ function Signal:Fire(...)
 	
 	self._args = {...}
 	self._argCount = select('#', ...)
-	if self._event then self._event:Fire() else warn('ERR: cannot fire a event that does not exist') end
+	if self._event then self._event:Fire() end
 end
 
 function Signal:Connect(handler)
