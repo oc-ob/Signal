@@ -1,16 +1,13 @@
 local Signal = {}
 Signal.__index = Signal
-_G.Signals = {}
 
-function Signal:New(name)
+function Signal:New()
 	if name and name ~= '' then
 		local new = {}
-		new._name = name
 		new._args = {}
 		new._argCount = nil
 		new._event = Instance.new("BindableEvent")
 		setmetatable(new,Signal)
-		_G.Signals[name] = new
 		print(string.format('[SIGNALS](INFO) Successfully created "%s" signal.',name))
 		return new
 	else
@@ -46,7 +43,6 @@ function Signal:Destroy()
 
 	self._args = nil
 	self._argCount = nil
-	self._name = nil
 end
 
 return Signal
