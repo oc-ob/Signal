@@ -1,48 +1,65 @@
 local Signal = {}
 Signal.__index = Signal
+Signal.ClassName = "Signal"
 
-function Signal:New()
-	if name and name ~= '' then
-		local new = {}
-		new._args = {}
-		new._argCount = nil
-		new._event = Instance.new("BindableEvent")
-		setmetatable(new,Signal)
-		print(string.format('[SIGNALS](INFO) Successfully created "%s" signal.',name))
-		return new
-	else
-		warn('[SIGNALS](ERR) Signal cannot have a nil or empty name.')
-	end
+local ENABLE_DEBUG_TRACEBACK = true
+
+-- Constructor
+function Signal.new()
+	local self = setmetatable({
+		_event = Instance.new("BindableEvent");
+		_args = {};
+		_argCount = 0;
+		_source = ENABLE_DEBUG_TRACEBACK and debug.traceback() or "";
+	},Signal)
+	
+	return self
 end
 
+---- Functions
+
+-- Fire
 function Signal:Fire(...)
-	if self._event then
-		self._args = {...}
-		self._argCount = select('#', ...)
-		self._event:Fire()
-	else
-		warn('[SIGNALS](ERR) Event not found or does not exist.')
-	end
+	assert(self._event ~= nil, string.format("No signal found. %s", self._source))
+	self._args = {...}
+	self._argCount = #self._args
+	
+	self._event:Fire()
 end
 
+function Signal:fire(...)
+	self:Fire(...)
+end
+
+-- Connect
 function Signal:Connect(handler)
-	if (typeof(handler) == 'function') then
-		return self._event.Event:Connect(function()
-			handler(unpack(self._args,1,self._argCount))
-		end)
-	else
-		warn(string.format('[SIGNALS](ERR) Cannot use "%s" as handler.',handler))
-	end
+	assert(type(handler) == "function", string.format("Handler must be a function. %s", self._source))
+	return self._event.Event:Connect(function()
+		handler(unpack(self._args))
+	end)
 end
 
-function Signal:Destroy()
-	if self._event then
-		self._event:Destroy()
-		self._event = nil
-	end
+function Signal:connect(handler)
+	self:Connect(handler)
+end
 
-	self._args = nil
-	self._argCount = nil
+-- Wait
+function Signal:Wait()
+	self._event.Event:Wait()
+	return unpack(self._args)
+end
+
+function Signal:wait()
+	self:Wait()
+end
+
+-- Destroy
+function Signal:Destroy()
+	self = {}
+end
+
+function Signal:destroy()
+	self:Destroy()
 end
 
 return Signal
