@@ -55,7 +55,11 @@ end
 
 -- Destroy
 function Signal:Destroy()
-	self = {}
+	if self._event then
+		self._event:Destroy()
+		self._event = nil
+	end
+	setmetatable(self,nil)
 end
 
 function Signal:destroy()
